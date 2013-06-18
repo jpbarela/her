@@ -245,15 +245,15 @@ describe Her::Model::Parse do
       end
 
       Her::API.default_api.connection.adapter :test do |stub|
-        stub.post("/users") { |env| [200, {}, { :users => [{ :id => 1, :fullname => params(env)[:users][:fullname] }] }.to_json] }
-        stub.post("/users/admins") { |env| [200, {}, { :users => [{ :id => 1, :fullname => params(env)[:users][:fullname] }] }.to_json] }
+        stub.post("/users/admins") { |env| [200, {}, { :users => [{ :id => 1, :fullname => params(env)[:users].first[:fullname] }] }.to_json] }
       end
     end
 
     context "to true" do
       before do
         spawn_model "Foo::User" do
-          include_root_in_json true, format: :jsonapi
+          include_root_in_json true, :format => :jsonapi
+          parse_root_in_json true, :format => :jsonapi
           custom_post :admins
         end
       end
@@ -263,10 +263,10 @@ describe Her::Model::Parse do
         @new_user.to_params.should == { :users => [{ :fullname => "Tobias Fünke" }] }
       end
 
-      # it "wraps params in the element name in `.create`" do
-      #   @new_user = Foo::User.admins(:fullname => "Tobias Fünke")
-      #   @new_user.fullname.should == "Tobias Fünke"
-      # end
+      it "wraps params in the element name in `.create`" do
+        @new_user = Foo::User.admins(:fullname => "Tobias Fünke")
+        @new_user.first.fullname.should == "Tobias Fünke"
+      end
     end
   end
 end
