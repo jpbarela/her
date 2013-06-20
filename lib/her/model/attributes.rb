@@ -181,7 +181,11 @@ module Her
         # Extracts the root element from a collection if jsonapi format is enabled
         # @param [Hash]
         def extract_root_from_collection(parsed_data)
-          jsonapi_format? ? parse(parsed_data) : parsed_data
+          if jsonapi_format? && !parsed_data.is_a?(Array)
+            parse(parsed_data)
+          else
+            parsed_data
+          end
         end
 
         # Define the attributes that will be used to track dirty attributes and validations
