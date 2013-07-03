@@ -146,40 +146,93 @@ describe Her::Model::HTTP do
   end
 
   context "setting custom HTTP requests" do
-    before do
-      Her::API.setup :url => "https://api.example.com" do |connection|
-        connection.use Her::Middleware::FirstLevelParseJSON
-        connection.adapter :test do |stub|
-          stub.get("/users/popular") { |env| [200, {}, [{ :id => 1 }, { :id => 2 }].to_json] }
-          stub.post("/users/from_default") { |env| [200, {}, { :id => 4 }.to_json] }
+    context "jsonapi format is enabled" do
+      before do
+        Her::API.setup :url => "https://api.example.com" do |connection|
+          connection.use Her::Middleware::FirstLevelParseJSON
+          connection.adapter :test do |stub|
+            stub.get("/users/popular") { |env| [200, {}, {:users => [{ :id => 1 }, { :id => 2 }]}.to_json] }
+            stub.post("/users/from_default") { |env| [200, {}, {:users => [{ :id => 4 }]}.to_json] }
+          end
+        end
+
+        spawn_model "Foo::User" do
+          parse_root_in_json   true, format: :jsonapi
+          include_root_in_json true, format: :jsonapi
         end
       end
 
-      spawn_model "Foo::User"
-    end
+      subject { Foo::User }
 
-    subject { Foo::User }
+      describe :custom_get do
+        context "parse as a collection (default)" do
+          before { Foo::User.custom_get :popular }
+          it { should respond_to(:popular) }
 
-    describe :custom_get do
-      context "without cache" do
-        before { Foo::User.custom_get :popular, :recent }
-        it { should respond_to(:popular) }
-        it { should respond_to(:recent) }
+          context "making the HTTP request" do
+            subject { Foo::User.popular }
+            its(:length) { should == 2 }
+          end
+        end
+
+        context "parse as a resource" do
+          before { Foo::User.custom_get :popular, :resource => true }
+          it { should respond_to(:popular) }
+
+          context "making the HTTP request" do
+            subject { Foo::User.popular }
+            its(:id) { should == 1 } #Directly load the user
+          end
+        end
+      end
+
+      describe :custom_post do
+        before { Foo::User.custom_post :from_default, :resource => true }
+        it { should respond_to(:from_default) }
 
         context "making the HTTP request" do
-          subject { Foo::User.popular }
-          its(:length) { should == 2 }
+          subject { Foo::User.from_default(:name => "Tobias Fünke") }
+          its(:id) { should == 4 }
         end
       end
     end
 
-    describe :custom_post do
-      before { Foo::User.custom_post :from_default }
-      it { should respond_to(:from_default) }
+    context "jsonapi format is disabled" do
+      before do
+        Her::API.setup :url => "https://api.example.com" do |connection|
+          connection.use Her::Middleware::FirstLevelParseJSON
+          connection.adapter :test do |stub|
+            stub.get("/users/popular") { |env| [200, {}, [{ :id => 1 }, { :id => 2 }].to_json] }
+            stub.post("/users/from_default") { |env| [200, {}, { :id => 4 }.to_json] }
+          end
+        end
 
-      context "making the HTTP request" do
-        subject { Foo::User.from_default(:name => "Tobias Fünke") }
-        its(:id) { should == 4 }
+        spawn_model "Foo::User"
+      end
+
+      subject { Foo::User }
+
+      describe :custom_get do
+        context "without cache" do
+          before { Foo::User.custom_get :popular, :recent }
+          it { should respond_to(:popular) }
+          it { should respond_to(:recent) }
+
+          context "making the HTTP request" do
+            subject { Foo::User.popular }
+            its(:length) { should == 2 }
+          end
+        end
+      end
+
+      describe :custom_post do
+        before { Foo::User.custom_post :from_default }
+        it { should respond_to(:from_default) }
+
+        context "making the HTTP request" do
+          subject { Foo::User.from_default(:name => "Tobias Fünke") }
+          its(:id) { should == 4 }
+        end
       end
     end
   end

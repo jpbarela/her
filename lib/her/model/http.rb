@@ -60,12 +60,13 @@ module Her
 
         METHODS.each do |method|
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
-            def #{method}(path, params={})
+            def #{method}(path, params={}, opts={})
               path = build_request_path_from_string_or_symbol(path, params)
               params = to_params(params) unless #{method.to_sym.inspect} == :get
               send(:'#{method}_raw', path, params) do |parsed_data, response|
                 if jsonapi_format?
-                  new_collection(parsed_data)
+                  collection = new_collection(parsed_data)
+                  opts[:resource] == true ? collection.first : collection
                 else
                   if parsed_data[:data].is_a?(Array)
                     new_collection(parsed_data)
@@ -102,7 +103,7 @@ module Her
               paths.each do |path|
                 metaclass.send(:define_method, path) do |*params|
                   params = params.first || Hash.new
-                  send(#{method.to_sym.inspect}, path, params)
+                  send(#{method.to_sym.inspect}, path, params, opts)
                 end
               end
             end
