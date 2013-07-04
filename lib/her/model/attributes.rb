@@ -41,6 +41,14 @@ module Her
         Her::Collection.new(collection_data, parsed_data[:metadata], parsed_data[:errors])
       end
 
+      def self.initialize_resource(klass, parsed_data={})
+        resource_data = klass.extract_root_from_collection(parsed_data[:data]).first
+        resource = klass.new(resource_data)
+        resource.metadata = parsed_data[:metadata]
+        resource.errors   = parsed_data[:errors]
+        resource
+      end
+
       # Use setter methods of model for each key / value pair in params
       # Return key / value pairs for which no setter method was defined on the model
       #
@@ -160,9 +168,14 @@ module Her
         # Initialize a collection of resources with raw data from an HTTP request
         #
         # @param [Array] parsed_data
+        # @param [hash] opts
         # @private
-        def new_collection(parsed_data)
-          Her::Model::Attributes.initialize_collection(self, parsed_data)
+        def new_collection(parsed_data, opts = {})
+          if opts[:resource] == true
+            Her::Model::Attributes.initialize_resource(self, parsed_data)
+          else
+            Her::Model::Attributes.initialize_collection(self, parsed_data)
+          end
         end
 
         # Initialize a new object with the "raw" parsed_data from the parsing middleware

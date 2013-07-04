@@ -65,8 +65,7 @@ module Her
               params = to_params(params) unless #{method.to_sym.inspect} == :get
               send(:'#{method}_raw', path, params) do |parsed_data, response|
                 if jsonapi_format?
-                  collection = new_collection(parsed_data)
-                  opts[:resource] == true ? collection.first : collection
+                  new_collection(parsed_data, opts) #Could be a collection or resource if resource => true
                 else
                   if parsed_data[:data].is_a?(Array)
                     new_collection(parsed_data)
