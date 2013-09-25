@@ -43,7 +43,7 @@ module Her
       end
 
       def self.initialize_resource(klass, parsed_data={})
-        resource_data = klass.extract_root_from_collection(parsed_data[:data]).first
+        resource_data = klass.extract_root_from_collection(parsed_data[:data]).try(:first)
         resource = klass.new(resource_data)
         resource.metadata = parsed_data[:metadata]
         resource.errors   = parsed_data[:errors]
