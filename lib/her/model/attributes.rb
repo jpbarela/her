@@ -19,6 +19,7 @@ module Her
       #  User.new(name: "Tobias") # => #<User name="Tobias">
       def initialize(attributes={})
         attributes ||= {}
+        @response_code = attributes.delete(:_response_code) || {}
         @metadata = attributes.delete(:_metadata) || {}
         @response_errors = attributes.delete(:_errors) || {}
         @destroyed = attributes.delete(:_destroyed) || false
@@ -38,7 +39,7 @@ module Her
           resource.run_callbacks :find
           resource
         end
-        Her::Collection.new(collection_data, parsed_data[:metadata], parsed_data[:errors])
+        Her::Collection.new(collection_data, parsed_data[:metadata], parsed_data[:errors], parsed_data[:response_code])
       end
 
       def self.initialize_resource(klass, parsed_data={})
@@ -46,6 +47,7 @@ module Her
         resource = klass.new(resource_data)
         resource.metadata = parsed_data[:metadata]
         resource.errors   = parsed_data[:errors]
+        resource.response_code = parsed_data[:response_code]
         resource
       end
 
@@ -256,6 +258,10 @@ module Her
         #   end
         def store_metadata(value = nil)
           store_her_data(:metadata, value)
+        end
+
+        def store_response_code(value = nil)
+          store_her_data(:response_code, value)
         end
 
         # @private

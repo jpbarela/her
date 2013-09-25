@@ -7,14 +7,15 @@ module Her
       # @param [String] body The response body
       # @return [Mixed] the parsed response
       # @private
-      def parse(body)
+      def parse(body, status)
         json = parse_json(body)
         errors = json.delete(:errors) || {}
         metadata = json.delete(:metadata) || {}
         {
           :data => json,
           :errors => errors,
-          :metadata => metadata
+          :metadata => metadata,
+          :response_code => status
         }
       end
 
@@ -26,9 +27,9 @@ module Her
       def on_complete(env)
         env[:body] = case env[:status]
         when 204
-          parse('{}')
+          parse('{}', env[:status])
         else
-          parse(env[:body])
+          parse(env[:body], env[:status])
         end
       end
     end

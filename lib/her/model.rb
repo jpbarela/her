@@ -60,6 +60,7 @@ module Her
 
       # Define default storage accessors for errors and metadata
       store_response_errors :response_errors
+      store_response_code :response_code
       store_metadata :metadata
 
       # Configure ActiveModel callbacks
