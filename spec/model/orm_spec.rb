@@ -88,7 +88,7 @@ describe Her::Model::ORM do
 
     it "handles error data on a collection" do
       @users = User.all
-      @users.errors.length.should == 3
+      @users.response_errors.length.should == 3
     end
 
     it "handles metadata on a resource" do

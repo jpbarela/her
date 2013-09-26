@@ -12,7 +12,7 @@ describe Her::Collection do
 
       it { should eq([]) }
       its(:metadata) { should eq({}) }
-      its(:errors) { should eq({}) }
+      its(:response_errors) { should eq({}) }
     end
 
     context "with parameters" do
@@ -20,7 +20,7 @@ describe Her::Collection do
 
       it { should eq([1,2,3,4]) }
       its(:metadata) { should eq({ :name => 'Testname' }) }
-      its(:errors) { should eq({ :name => ['not_present'] }) }
+      its(:response_errors) { should eq({ :name => ['not_present'] }) }
     end
   end
 end

@@ -46,7 +46,7 @@ module Her
         resource_data = klass.extract_root_from_collection(parsed_data[:data]).try(:first)
         resource = klass.new(resource_data)
         resource.metadata = parsed_data[:metadata]
-        resource.errors   = parsed_data[:errors]
+        resource.response_errors = parsed_data[:errors]
         resource.response_code = parsed_data[:response_code]
         resource
       end
