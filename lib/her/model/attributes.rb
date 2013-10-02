@@ -184,7 +184,7 @@ module Her
         #
         # @private
         def new_from_parsed_data(parsed_data)
-          new(extract_array(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors])
+          new(extract_array(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors], :_response_code => parsed_data[:response_code])
         end
 
         # Extracts the array wrapper if jsonapi format is enabled

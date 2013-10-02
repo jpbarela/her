@@ -70,7 +70,7 @@ module Her
                   if parsed_data[:data].is_a?(Array)
                     new_collection(parsed_data)
                   else
-                    new(parse(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors])
+                    new(parse(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors], :_response_code => parsed_data[:_response_code])
                   end
                 end
               end
@@ -91,7 +91,7 @@ module Her
             def #{method}_resource(path, params={})
               path = build_request_path_from_string_or_symbol(path, params)
               send(:"#{method}_raw", path, params) do |parsed_data, response|
-                new(parse(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors])
+                new(parse(parsed_data[:data]).merge :_metadata => parsed_data[:metadata], :_errors => parsed_data[:errors], :_response_code => parsed_data[:response_code])
               end
             end
 
